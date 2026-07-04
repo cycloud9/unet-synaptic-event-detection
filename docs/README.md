@@ -1,35 +1,48 @@
-# PSC U-Net GitHub Pages starter
+# U-Net Synaptic Event Detection
 
-A static project website for the 1D U-Net synaptic-event detection project.
+A deep-learning-based graphical tool for detecting synaptic events in electrophysiology recordings.  
+This project provides U-Net inference pipelines and a Tkinter GUI for EPSC and IPSC event detection, review, correction, and export.
 
-## Preview locally
+The software is designed for patch-clamp current traces and supports both automatic event detection and manual inspection through an interactive trace viewer.
 
-```bash
-python -m http.server 8000
-```
+---
 
-Open `http://localhost:8000`.
+## Overview
 
-## Publish with GitHub Pages
+This repository contains the source code for a U-Net-based synaptic event detection system.
 
-1. Create a repository, for example `psc-unet`.
-2. Copy all files in this folder to the repository root.
-3. Replace every placeholder `href="#" data-repo-link` in `index.html` with the repository URL.
-4. Commit and push to the `main` branch.
-5. In GitHub: **Settings → Pages → Build and deployment → Deploy from a branch**.
-6. Select `main` and `/ (root)`, then save.
+Main features:
 
-## Suggested next edits
+- EPSC and IPSC detection modes
+- U-Net probability-based event detection
+- Support for CSV trace input
+- Support for ABF-to-CSV conversion
+- Interactive GUI for event visualization
+- Event list navigation
+- Potential event review
+- Manual event promotion and demotion
+- Single-event zoom view
+- Export of confirmed events to CSV
 
-- Add the final repository URL and manuscript DOI.
-- Replace the provisional BibTeX entry with the final citation.
-- Add installation instructions and a quick-start demo.
-- Add model weights and sample data links when public release is approved.
-- Verify author order, affiliations, funding language, and licensing before publication.
+The GUI is intended to help users combine automated deep learning inference with manual electrophysiology event curation.
 
-## Files
+---
 
-- `index.html` — page content
-- `styles.css` — visual design and responsive layout
-- `script.js` — mobile navigation and citation copy button
-- `assets/` — figures and manuscript PDF
+## Repository Structure
+
+```text
+unet-synaptic-event-detection/
+├── app/
+│   ├── unet_gui_v8.py
+│   ├── unet_ola_fp_fn.py
+│   ├── unet_ola_fp_fn_ipsc.py
+│   ├── abf2csv.py
+│   └── __init__.py
+├── docs/
+│   ├── index.html
+│   ├── styles.css
+│   ├── script.js
+│   └── assets/
+├── requirements.txt
+├── run_gui.py
+└── README.md
