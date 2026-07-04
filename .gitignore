@@ -1,0 +1,42 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Packaged applications
+*.exe
+dist/
+build/
+*.spec
+
+# Release packages
+*.zip
+
+# User data and generated outputs
+*.abf
+*_trace.csv
+*_events.csv
+*_events_gui.csv
+*_FP_events.csv
+*_FN_events.csv
+*_pred_union.csv
+data/
+datasets/
+outputs/
+models/*.keras
+cache/
+temp/
+tmp/
+
+# Logs
+*.log
