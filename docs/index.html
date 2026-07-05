@@ -3,62 +3,184 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="A fully convolutional 1D U-Net framework for automated EPSC and IPSC event detection." />
+  <meta name="description" content="A 1D U-Net framework for automated EPSC and IPSC event detection in electrophysiology recordings." />
   <title>U-Net Synaptic Event Detection</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Adaptive figure layout and automatic whitespace trimming. -->
   <style>
-    .figure-card {
-      text-align: center;
-      overflow: visible !important;
+    :root {
+      --paper-ink: #111827;
+      --paper-muted: #667085;
+      --paper-border: rgba(17, 24, 39, 0.12);
+      --paper-soft: #f5f7fb;
     }
 
+    html { scroll-behavior: smooth; }
+
+    .brand span { color: inherit; opacity: 0.72; }
+
+    .hero-copy .lead { max-width: 760px; }
+
+    .hero-actions { flex-wrap: wrap; }
+
+    .authors { line-height: 1.7; }
+
+    .figure-card,
+    .paper-figure-card {
+      box-sizing: border-box;
+      width: 100%;
+      overflow: visible;
+      text-align: center;
+    }
+
+    .paper-figure-card {
+      border: 1px solid var(--paper-border);
+      border-radius: 24px;
+      background: #fff;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.08);
+      padding: clamp(18px, 2.4vw, 34px);
+      margin: 0 auto;
+    }
+
+    .paper-figure-card img,
     .figure-card img {
       display: block;
-      width: auto !important;
-      max-width: 100% !important;
-      height: auto !important;
-      max-height: none !important;
-      margin: 0 auto !important;
-      object-fit: contain !important;
-      object-position: center center !important;
-      transform: none !important;
+      width: 100%;
+      height: auto;
+      max-width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+      object-fit: contain;
+      object-position: center center;
+      transform: none;
     }
 
-    .figure-card[data-autotrim="true"] img {
-      transition: opacity 0.15s ease-in-out;
+    .paper-figure-card.narrow img { max-width: 980px; }
+    .paper-figure-card.medium img { max-width: 1120px; }
+    .paper-figure-card.wide img { max-width: 1280px; }
+
+    .paper-figure-card figcaption,
+    .figure-card figcaption {
+      max-width: 920px;
+      margin: 16px auto 0;
+      color: var(--paper-muted);
+      line-height: 1.65;
+      font-size: 0.98rem;
     }
 
-    .results-grid .figure-card,
-    .two-col .figure-card,
-    .figure-card.wide-gap {
-      display: flex;
-      flex-direction: column;
+    .figure-stack {
+      display: grid;
+      gap: clamp(22px, 3vw, 38px);
+    }
+
+    .two-figure-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(20px, 2.4vw, 32px);
+      align-items: start;
+    }
+
+    .results-grid.paper-results {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.75fr);
+      gap: clamp(24px, 3vw, 44px);
+      align-items: start;
+    }
+
+    .result-cards article {
+      border: 1px solid var(--paper-border);
+    }
+
+    .mini-note {
+      color: var(--paper-muted);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      margin-top: 14px;
+    }
+
+    .software-layout {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.85fr) minmax(0, 1.25fr);
+      gap: clamp(24px, 3vw, 44px);
       align-items: center;
-      justify-content: center;
     }
 
-    .results-grid .figure-card img {
-      max-width: min(100%, 980px) !important;
+    .software-layout .paper-figure-card { padding: clamp(14px, 2vw, 24px); }
+
+    .compact-list {
+      padding-left: 0;
+      list-style: none;
+      display: grid;
+      gap: 12px;
+      margin: 22px 0;
     }
 
-    .figure-card.wide-gap img {
-      max-width: min(100%, 1080px) !important;
+    .compact-list li {
+      padding-left: 28px;
+      position: relative;
+      color: var(--paper-muted);
+      line-height: 1.55;
     }
 
-    .two-col .figure-card img {
-      max-width: min(100%, 760px) !important;
+    .compact-list li::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.42;
+      position: absolute;
+      left: 4px;
+      top: 0.68em;
     }
 
-    .hero-actions {
-      flex-wrap: wrap;
+    .section-subhead {
+      max-width: 820px;
+      margin: 0 auto clamp(22px, 3vw, 34px);
+      text-align: center;
+    }
+
+    .section-subhead h3 {
+      margin: 0 0 10px;
+      font-size: clamp(1.5rem, 2.6vw, 2.15rem);
+      color: var(--paper-ink);
+    }
+
+    .section-subhead p {
+      margin: 0;
+      color: var(--paper-muted);
+      line-height: 1.7;
+    }
+
+    .nav-links a[href="#citation"] { display: none; }
+
+    @media (max-width: 960px) {
+      .results-grid.paper-results,
+      .software-layout,
+      .two-figure-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .paper-figure-card { border-radius: 18px; }
+    }
+
+    @media (max-width: 640px) {
+      .paper-figure-card {
+        padding: 12px;
+        border-radius: 16px;
+      }
+
+      .paper-figure-card figcaption,
+      .figure-card figcaption {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
+
 <body>
   <header class="nav-wrap">
     <nav class="nav container">
@@ -67,8 +189,8 @@
       <div class="nav-links">
         <a href="#method">Method</a>
         <a href="#results">Results</a>
+        <a href="#ipsc">IPSC</a>
         <a href="#software">Software</a>
-        <a href="#citation">Citation</a>
         <a class="button small secondary" href="assets/manuscript.pdf">Paper</a>
         <a class="button small" href="https://github.com/cycloud9/unet-synaptic-event-detection">GitHub</a>
       </div>
@@ -80,7 +202,7 @@
       <div class="hero-copy">
         <div class="eyebrow">Electrophysiology research software</div>
         <h1>Fast, robust detection of synaptic events with a 1D U-Net</h1>
-        <p class="lead">An end-to-end framework for detecting EPSCs and IPSCs in noisy, long-duration patch-clamp recordings, with pointwise temporal localization, overlap-aware inference, and a researcher-friendly GUI.</p>
+        <p class="lead">An end-to-end framework for detecting EPSCs and IPSCs in noisy, long-duration patch-clamp recordings, with pointwise temporal localization, overlap-add inference, and an interactive review GUI.</p>
         <div class="hero-actions">
           <a class="button" href="https://github.com/cycloud9/unet-synaptic-event-detection/releases/download/v1.0.0/UNet_Synaptic_Event_Detector_v1.0.0_Windows_x64.zip">Download Windows App</a>
           <a class="button secondary" href="assets/manuscript.pdf">Read the manuscript</a>
@@ -102,7 +224,7 @@
     <section class="strip">
       <div class="container strip-grid">
         <div><span>Architecture</span><strong>Fully convolutional 1D U-Net</strong></div>
-        <div><span>Input</span><strong>480 samples / 48 ms</strong></div>
+        <div><span>Input window</span><strong>480 samples / 48 ms</strong></div>
         <div><span>Inference</span><strong>Overlap-add reconstruction</strong></div>
         <div><span>Extension</span><strong>Dilated IPSC bottleneck</strong></div>
       </div>
@@ -111,66 +233,108 @@
     <section id="method" class="section container">
       <div class="section-head">
         <div class="eyebrow">Method</div>
-        <h2>Designed for dense, high-resolution event localization</h2>
-        <p>The model predicts a continuous probability trace rather than assigning one label to each sliding window. Skip connections preserve event morphology, while overlap-add inference reconstructs a smooth full-length prediction.</p>
+        <h2>Dense temporal prediction for event-level localization</h2>
+        <p>The model predicts a continuous event-probability trace rather than assigning one label to each window. Skip connections preserve event morphology, while overlap-add inference reconstructs smooth full-length predictions.</p>
       </div>
-      <figure class="figure-card" data-autotrim="true">
-        <img src="assets/architecture.png" alt="U-Net architecture and inference workflow" />
-        <figcaption>Raw traces are segmented, processed by a dual-head 1D U-Net, reconstructed into a continuous probability map, and converted into discrete events through confidence-based post-processing.</figcaption>
+
+      <figure class="paper-figure-card wide">
+        <img src="assets/architecture.png" alt="U-Net architecture and overlap-add inference workflow" loading="eager" />
+        <figcaption>Workflow and architecture. Raw traces are segmented, processed by a 1D U-Net, reconstructed into a continuous probability trace, and converted into event calls by peak detection.</figcaption>
       </figure>
+
       <div class="feature-grid">
-        <article><div class="number">01</div><h3>Morphology-centric normalization</h3><p>Local min-max normalization reduces dependence on absolute amplitude and helps preserve sensitivity to small events.</p></article>
-        <article><div class="number">02</div><h3>Dual-threshold decoding</h3><p>A fixed low threshold and adaptive high-confidence threshold identify candidate probability blobs and event centers.</p></article>
-        <article><div class="number">03</div><h3>Overlap-add inference</h3><p>Overlapping windows and weighted reconstruction reduce boundary artifacts in recordings of arbitrary duration.</p></article>
-        <article><div class="number">04</div><h3>Dilated IPSC pathway</h3><p>A parallel multi-scale bottleneck expands the receptive field for slower inhibitory-current kinetics.</p></article>
+        <article><div class="number">01</div><h3>Morphology-aware input</h3><p>Window-level preprocessing emphasizes event shape while reducing dependence on absolute amplitude scale.</p></article>
+        <article><div class="number">02</div><h3>Pointwise output</h3><p>The network returns a probability value at each time point, enabling dense localization of event centers.</p></article>
+        <article><div class="number">03</div><h3>Overlap-add inference</h3><p>Overlapping windows and weighted reconstruction reduce boundary artifacts in long recordings.</p></article>
+        <article><div class="number">04</div><h3>Manual review</h3><p>The GUI supports verification, correction, potential-event inspection, and CSV export.</p></article>
       </div>
     </section>
 
     <section id="results" class="section soft">
-      <div class="container">
+      <div class="container figure-stack">
         <div class="section-head">
-          <div class="eyebrow">Results</div>
+          <div class="eyebrow">EPSC benchmark</div>
           <h2>Higher recall without sacrificing precision</h2>
-          <p>Across 30 MSN recordings, the U-Net achieved the strongest overall F1 score among the evaluated approaches and was especially robust for overlapping and low-amplitude events.</p>
+          <p>Across MSN recordings, the U-Net achieved the strongest overall F1 score among the evaluated approaches and remained sensitive to low-amplitude and temporally adjacent events.</p>
         </div>
-        <div class="results-grid">
-          <figure class="figure-card" data-autotrim="true">
-            <img src="assets/benchmark.png" alt="Benchmark comparison against SimplyFire, miniML, and deconvolution" />
-            <figcaption>Benchmark comparison against SimplyFire, miniML, and deconvolution.</figcaption>
+
+        <div class="results-grid paper-results">
+          <figure class="paper-figure-card medium">
+            <img src="assets/benchmark.png" alt="Benchmark comparison against SimplyFire, miniML, and deconvolution" loading="lazy" />
+            <figcaption>Benchmark comparison against SimplyFire, miniML, and deconvolution on high-SNR and low-SNR EPSC traces.</figcaption>
           </figure>
           <div class="result-cards">
             <article><span>EPSC recall</span><strong>0.912</strong><p>Compared with 0.696 for SimplyFire, 0.679 for miniML, and 0.478 for deconvolution.</p></article>
-            <article><span>Overlapping-event recall</span><strong>0.871</strong><p>Improved separation of temporally adjacent events using dense pointwise prediction.</p></article>
-            <article><span>Organoid zero-shot F1</span><strong>0.845</strong><p>Brain-slice-trained EPSC model generalized to human brain organoid recordings.</p></article>
+            <article><span>EPSC precision</span><strong>0.917</strong><p>Maintained high precision while recovering more true events than the comparison methods.</p></article>
+            <article><span>EPSC F1 score</span><strong>0.913</strong><p>Best overall balance between precision and recall in the benchmark set.</p></article>
           </div>
         </div>
-        <figure class="figure-card wide-gap" data-autotrim="true">
-          <img src="assets/dilated.png" alt="Dilated convolution results for IPSC detection" />
-          <figcaption>Dilated convolutions expand temporal context and improve precision, recall, and F1 for IPSC detection, especially for longer-duration events.</figcaption>
+
+        <div class="section-subhead">
+          <h3>Performance on challenging event types</h3>
+          <p>Additional analyses evaluate temporally overlapping events and small-amplitude events, two common failure modes in synaptic event detection.</p>
+        </div>
+        <figure class="paper-figure-card wide">
+          <img src="assets/event_subtypes.png" alt="Multi-peak and small-event detection comparison" loading="lazy" />
+          <figcaption>Analysis of multi-peak events and small-amplitude events. The U-Net improves recall for overlapping peaks and remains robust across amplitude quartiles.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="ipsc" class="section container figure-stack">
+      <div class="section-head">
+        <div class="eyebrow">IPSC extension</div>
+        <h2>Dilated bottleneck for slower inhibitory-current kinetics</h2>
+        <p>IPSCs have broader temporal profiles than EPSCs. A parallel dilated-convolution bottleneck expands temporal context while preserving pointwise prediction.</p>
+      </div>
+
+      <div class="two-figure-grid">
+        <figure class="paper-figure-card medium">
+          <img src="assets/ipsc_dilated_overview.png" alt="Dilated U-Net architecture and IPSC performance summary" loading="lazy" />
+          <figcaption>Dilated-convolution extension and paired performance comparison for IPSC event detection.</figcaption>
+        </figure>
+        <figure class="paper-figure-card medium">
+          <img src="assets/ipsc_duration_binning.png" alt="IPSC event-duration binning and performance by duration" loading="lazy" />
+          <figcaption>Duration-binning strategy and recall improvement across IPSC kinetic-duration groups.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="organoid" class="section soft">
+      <div class="container figure-stack">
+        <div class="section-head">
+          <div class="eyebrow">Generalization</div>
+          <h2>Transfer to human brain organoid recordings</h2>
+          <p>The EPSC-trained model was evaluated on organoid recordings to assess transfer across preparation type and recording frequency.</p>
+        </div>
+        <figure class="paper-figure-card wide">
+          <img src="assets/organoid_transfer.png" alt="Synaptic event detection in human brain organoid recordings" loading="lazy" />
+          <figcaption>Application to human brain organoid recordings, including representative traces, probability outputs, predicted events, and transfer-learning comparison.</figcaption>
         </figure>
       </div>
     </section>
 
     <section id="software" class="section container">
-      <div class="two-col">
+      <div class="software-layout">
         <div>
           <div class="eyebrow">Software</div>
-          <h2>Built for experimental workflows</h2>
-          <p>The desktop GUI integrates trace loading, model inference, probability visualization, event navigation, manual verification, and CSV export.</p>
-          <ul class="checklist">
-            <li>EPSC and IPSC model selection</li>
-            <li>Trace-level and single-event visualization</li>
-            <li>Detected and potential-event review</li>
-            <li>Manual promotion, correction, and export</li>
+          <h2>Interactive workflow for experimental review</h2>
+          <p>The desktop GUI integrates trace loading, model selection, inference, probability visualization, event navigation, manual verification, and CSV export.</p>
+          <ul class="compact-list">
+            <li>EPSC and IPSC mode selection</li>
+            <li>CSV and ABF trace loading</li>
+            <li>Detected-event and potential-event review</li>
+            <li>Manual event promotion, rejection, and export</li>
           </ul>
           <div class="hero-actions">
             <a class="button" href="https://github.com/cycloud9/unet-synaptic-event-detection/releases/download/v1.0.0/UNet_Synaptic_Event_Detector_v1.0.0_Windows_x64.zip">Download Windows App</a>
             <a class="button secondary" href="https://github.com/cycloud9/unet-synaptic-event-detection">View source code</a>
           </div>
+          <p class="mini-note">The Windows package includes the executable and model files. Raw recordings are user-provided and are not bundled with the release.</p>
         </div>
-        <figure class="figure-card" data-autotrim="true">
-          <img src="assets/gui.png" alt="Interactive GUI for synaptic event detection" />
-          <figcaption>Interactive GUI for model inference, review, and event export.</figcaption>
+        <figure class="paper-figure-card wide">
+          <img src="assets/gui.png" alt="GUI for U-Net synaptic event detection" loading="lazy" />
+          <figcaption>GUI modules for trace/model selection, inference log, event display, probability output, navigation, single-event zoom, and export.</figcaption>
         </figure>
       </div>
     </section>
@@ -202,94 +366,6 @@
     </div>
   </footer>
 
-
-  <script>
-    // Automatically trims large white margins inside exported figure PNGs.
-    // This avoids manual per-image translate/scale rules and keeps figures centered responsively.
-    (function () {
-      function cropWhiteMargins(img) {
-        if (img.dataset.trimmed === "true") return;
-        img.dataset.trimmed = "true";
-
-        const source = new Image();
-        source.crossOrigin = "anonymous";
-        source.onload = function () {
-          const width = source.naturalWidth;
-          const height = source.naturalHeight;
-          if (!width || !height) return;
-
-          const canvas = document.createElement("canvas");
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d", { willReadFrequently: true });
-          ctx.drawImage(source, 0, 0);
-
-          let data;
-          try {
-            data = ctx.getImageData(0, 0, width, height).data;
-          } catch (err) {
-            return;
-          }
-
-          let minX = width, minY = height, maxX = -1, maxY = -1;
-          const whiteThreshold = 246;
-          const alphaThreshold = 12;
-
-          for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-              const i = (y * width + x) * 4;
-              const r = data[i];
-              const g = data[i + 1];
-              const b = data[i + 2];
-              const a = data[i + 3];
-              const isWhite = r >= whiteThreshold && g >= whiteThreshold && b >= whiteThreshold;
-              const isTransparent = a <= alphaThreshold;
-              if (!isWhite && !isTransparent) {
-                if (x < minX) minX = x;
-                if (y < minY) minY = y;
-                if (x > maxX) maxX = x;
-                if (y > maxY) maxY = y;
-              }
-            }
-          }
-
-          if (maxX < 0 || maxY < 0) return;
-
-          const pad = Math.max(20, Math.round(Math.min(width, height) * 0.025));
-          minX = Math.max(0, minX - pad);
-          minY = Math.max(0, minY - pad);
-          maxX = Math.min(width - 1, maxX + pad);
-          maxY = Math.min(height - 1, maxY + pad);
-
-          const cropW = maxX - minX + 1;
-          const cropH = maxY - minY + 1;
-
-          // Skip if the crop would barely change anything.
-          if (cropW > width * 0.96 && cropH > height * 0.96) return;
-
-          const out = document.createElement("canvas");
-          out.width = cropW;
-          out.height = cropH;
-          out.getContext("2d").drawImage(source, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-          img.src = out.toDataURL("image/png");
-        };
-        source.src = img.currentSrc || img.src;
-      }
-
-      function initAutoTrim() {
-        document.querySelectorAll('.figure-card[data-autotrim="true"] img').forEach(function (img) {
-          if (img.complete) cropWhiteMargins(img);
-          else img.addEventListener("load", function () { cropWhiteMargins(img); }, { once: true });
-        });
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initAutoTrim);
-      } else {
-        initAutoTrim();
-      }
-    })();
-  </script>
   <script src="script.js"></script>
 </body>
 </html>
