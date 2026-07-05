@@ -36,6 +36,33 @@
       max-width: 980px;
     }
 
+    /*
+      Some exported manuscript figures include large internal white margins,
+      which makes the visible content appear shifted down/right even when the
+      image element itself is centered. These classes crop only that internal
+      whitespace and visually recenter the figure content.
+    */
+    .figure-card.recenter-figure {
+      overflow: hidden;
+    }
+
+    .figure-card.recenter-figure img {
+      max-width: none;
+      width: 108%;
+      margin-left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .figure-card.recenter-benchmark img {
+      width: 118%;
+      transform: translate(-53%, -7%) scale(1.02);
+    }
+
+    .figure-card.recenter-dilated img {
+      width: 116%;
+      transform: translate(-52%, -6%) scale(1.02);
+    }
+
     .hero-actions {
       flex-wrap: wrap;
     }
@@ -116,7 +143,7 @@
           <p>Across 30 MSN recordings, the U-Net achieved the strongest overall F1 score among the evaluated approaches and was especially robust for overlapping and low-amplitude events.</p>
         </div>
         <div class="results-grid">
-          <figure class="figure-card">
+          <figure class="figure-card recenter-figure recenter-benchmark">
             <img src="assets/benchmark.png" alt="Benchmark comparison against SimplyFire, miniML, and deconvolution" />
             <figcaption>Benchmark comparison against SimplyFire, miniML, and deconvolution.</figcaption>
           </figure>
@@ -126,7 +153,7 @@
             <article><span>Organoid zero-shot F1</span><strong>0.845</strong><p>Brain-slice-trained EPSC model generalized to human brain organoid recordings.</p></article>
           </div>
         </div>
-        <figure class="figure-card wide-gap">
+        <figure class="figure-card wide-gap recenter-figure recenter-dilated">
           <img src="assets/dilated.png" alt="Dilated convolution results for IPSC detection" />
           <figcaption>Dilated convolutions expand temporal context and improve precision, recall, and F1 for IPSC detection, especially for longer-duration events.</figcaption>
         </figure>
