@@ -10,57 +10,48 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- Page-level fixes: keep figures centered and avoid cropped/off-center images. -->
+  <!-- Adaptive figure layout and automatic whitespace trimming. -->
   <style>
     .figure-card {
       text-align: center;
+      overflow: visible !important;
     }
 
     .figure-card img {
       display: block;
-      width: 100%;
-      max-width: 980px;
-      height: auto;
-      margin-left: auto;
-      margin-right: auto;
-      object-fit: contain;
-      object-position: center center;
+      width: auto !important;
+      max-width: 100% !important;
+      height: auto !important;
+      max-height: none !important;
+      margin: 0 auto !important;
+      object-fit: contain !important;
+      object-position: center center !important;
+      transform: none !important;
     }
 
-    .results-grid .figure-card img,
-    .two-col .figure-card img {
-      max-width: 640px;
+    .figure-card[data-autotrim="true"] img {
+      transition: opacity 0.15s ease-in-out;
+    }
+
+    .results-grid .figure-card,
+    .two-col .figure-card,
+    .figure-card.wide-gap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .results-grid .figure-card img {
+      max-width: min(100%, 980px) !important;
     }
 
     .figure-card.wide-gap img {
-      max-width: 980px;
+      max-width: min(100%, 1080px) !important;
     }
 
-    /*
-      Some exported manuscript figures include large internal white margins,
-      which makes the visible content appear shifted down/right even when the
-      image element itself is centered. These classes crop only that internal
-      whitespace and visually recenter the figure content.
-    */
-    .figure-card.recenter-figure {
-      overflow: hidden;
-    }
-
-    .figure-card.recenter-figure img {
-      max-width: none;
-      width: 108%;
-      margin-left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .figure-card.recenter-benchmark img {
-      width: 118%;
-      transform: translate(-53%, -7%) scale(1.02);
-    }
-
-    .figure-card.recenter-dilated img {
-      width: 116%;
-      transform: translate(-52%, -6%) scale(1.02);
+    .two-col .figure-card img {
+      max-width: min(100%, 760px) !important;
     }
 
     .hero-actions {
@@ -123,7 +114,7 @@
         <h2>Designed for dense, high-resolution event localization</h2>
         <p>The model predicts a continuous probability trace rather than assigning one label to each sliding window. Skip connections preserve event morphology, while overlap-add inference reconstructs a smooth full-length prediction.</p>
       </div>
-      <figure class="figure-card">
+      <figure class="figure-card" data-autotrim="true">
         <img src="assets/architecture.png" alt="U-Net architecture and inference workflow" />
         <figcaption>Raw traces are segmented, processed by a dual-head 1D U-Net, reconstructed into a continuous probability map, and converted into discrete events through confidence-based post-processing.</figcaption>
       </figure>
@@ -143,7 +134,7 @@
           <p>Across 30 MSN recordings, the U-Net achieved the strongest overall F1 score among the evaluated approaches and was especially robust for overlapping and low-amplitude events.</p>
         </div>
         <div class="results-grid">
-          <figure class="figure-card recenter-figure recenter-benchmark">
+          <figure class="figure-card" data-autotrim="true">
             <img src="assets/benchmark.png" alt="Benchmark comparison against SimplyFire, miniML, and deconvolution" />
             <figcaption>Benchmark comparison against SimplyFire, miniML, and deconvolution.</figcaption>
           </figure>
@@ -153,7 +144,7 @@
             <article><span>Organoid zero-shot F1</span><strong>0.845</strong><p>Brain-slice-trained EPSC model generalized to human brain organoid recordings.</p></article>
           </div>
         </div>
-        <figure class="figure-card wide-gap recenter-figure recenter-dilated">
+        <figure class="figure-card wide-gap" data-autotrim="true">
           <img src="assets/dilated.png" alt="Dilated convolution results for IPSC detection" />
           <figcaption>Dilated convolutions expand temporal context and improve precision, recall, and F1 for IPSC detection, especially for longer-duration events.</figcaption>
         </figure>
@@ -177,7 +168,7 @@
             <a class="button secondary" href="https://github.com/cycloud9/unet-synaptic-event-detection">View source code</a>
           </div>
         </div>
-        <figure class="figure-card">
+        <figure class="figure-card" data-autotrim="true">
           <img src="assets/gui.png" alt="Interactive GUI for synaptic event detection" />
           <figcaption>Interactive GUI for model inference, review, and event export.</figcaption>
         </figure>
@@ -211,6 +202,94 @@
     </div>
   </footer>
 
+
+  <script>
+    // Automatically trims large white margins inside exported figure PNGs.
+    // This avoids manual per-image translate/scale rules and keeps figures centered responsively.
+    (function () {
+      function cropWhiteMargins(img) {
+        if (img.dataset.trimmed === "true") return;
+        img.dataset.trimmed = "true";
+
+        const source = new Image();
+        source.crossOrigin = "anonymous";
+        source.onload = function () {
+          const width = source.naturalWidth;
+          const height = source.naturalHeight;
+          if (!width || !height) return;
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+          ctx.drawImage(source, 0, 0);
+
+          let data;
+          try {
+            data = ctx.getImageData(0, 0, width, height).data;
+          } catch (err) {
+            return;
+          }
+
+          let minX = width, minY = height, maxX = -1, maxY = -1;
+          const whiteThreshold = 246;
+          const alphaThreshold = 12;
+
+          for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+              const i = (y * width + x) * 4;
+              const r = data[i];
+              const g = data[i + 1];
+              const b = data[i + 2];
+              const a = data[i + 3];
+              const isWhite = r >= whiteThreshold && g >= whiteThreshold && b >= whiteThreshold;
+              const isTransparent = a <= alphaThreshold;
+              if (!isWhite && !isTransparent) {
+                if (x < minX) minX = x;
+                if (y < minY) minY = y;
+                if (x > maxX) maxX = x;
+                if (y > maxY) maxY = y;
+              }
+            }
+          }
+
+          if (maxX < 0 || maxY < 0) return;
+
+          const pad = Math.max(20, Math.round(Math.min(width, height) * 0.025));
+          minX = Math.max(0, minX - pad);
+          minY = Math.max(0, minY - pad);
+          maxX = Math.min(width - 1, maxX + pad);
+          maxY = Math.min(height - 1, maxY + pad);
+
+          const cropW = maxX - minX + 1;
+          const cropH = maxY - minY + 1;
+
+          // Skip if the crop would barely change anything.
+          if (cropW > width * 0.96 && cropH > height * 0.96) return;
+
+          const out = document.createElement("canvas");
+          out.width = cropW;
+          out.height = cropH;
+          out.getContext("2d").drawImage(source, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+          img.src = out.toDataURL("image/png");
+        };
+        source.src = img.currentSrc || img.src;
+      }
+
+      function initAutoTrim() {
+        document.querySelectorAll('.figure-card[data-autotrim="true"] img').forEach(function (img) {
+          if (img.complete) cropWhiteMargins(img);
+          else img.addEventListener("load", function () { cropWhiteMargins(img); }, { once: true });
+        });
+      }
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initAutoTrim);
+      } else {
+        initAutoTrim();
+      }
+    })();
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
